@@ -55,9 +55,16 @@ def purchasePlaces():
         0
     ]
     club = [c for c in clubs if c["name"] == request.form["club"]][0]
-    placesRequired = int(request.form["places"])
+    places_required = int(request.form["places"])
     clubPoints = int(club["points"])
-    if clubPoints < placesRequired:
+
+    if places_required > 12:
+        message = "You can't book more than 12 places"
+        flash(message)
+        return redirect(
+            url_for("book", club=club["name"], competition=competition["name"])
+        )
+    elif clubPoints < placesRequired:
         message = "You don't have enough points."
         flash(message)
         return redirect(
@@ -65,11 +72,10 @@ def purchasePlaces():
         )
     else:
         competition["numberOfPlaces"] = (
-            int(competition["numberOfPlaces"]) - placesRequired
+            int(competition["numberOfPlaces"]) - places_required
         )
         flash("Great-booking complete!")
         return render_template("welcome.html", club=club, competitions=competitions)
-
 
 
 # TODO: Add route for points display
