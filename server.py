@@ -1,6 +1,6 @@
 import json
 from flask import Flask, render_template, request, redirect, flash, url_for
-
+from datetime import datetime
 
 def load_clubs():
     with open("clubs.json") as c:
@@ -27,7 +27,7 @@ def index():
 
 
 @app.route("/showSummary", methods=["POST"])
-def showSummary():
+def show_summary():
     try:
         club = [club for club in clubs if club["email"] == request.form["email"]][0]
     except IndexError:
@@ -37,13 +37,36 @@ def showSummary():
     return render_template("welcome.html", club=club, competitions=competitions)
 
 
+@app.route("/show_summary_get/<email>", methods=["GET"])
+def show_summary_get(email):
+    """Render the welcome template after a booking edge case"""
+    clubs = sorted(load_clubs(), key=lambda club: club["name"])
+    competitions = load_competitions()
+    try:
+        club = next(club for club in clubs if club["email"] == email)
+    except StopIteration:
+        message = "Sorry, that email wasn't found"
+        flash(message)
+        return redirect(url_for("index"))
+    return render_template(
+        "welcome.html", club=club, clubs=clubs, competitions=competitions
+    )
+
+
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
-    foundClub = [c for c in clubs if c["name"] == club][0]
-    foundCompetition = [c for c in competitions if c["name"] == competition][0]
-    if foundClub and foundCompetition:
+    found_club = [c for c in clubs if c["name"] == club][0]
+    found_competition = [c for c in competitions if c["name"] == competition][0]
+    if found_club and found_competition:
+        date_competition = datetime.strptime(
+            found_competition["date"], "%Y-%m-%d %H:%M:%S"
+        )
+        if date_competition < datetime.now():
+            message = "You can't purchase places on a past competition."
+            flash(message)
+            return redirect(url_for("show_summary_get", email=found_club["email"]))
         return render_template(
-            "booking.html", club=foundClub, competition=foundCompetition
+            "booking.html", club=found_club, competition=found_competition
         )
     else:
         flash("Something went wrong-please try again")
@@ -51,7 +74,7 @@ def book(competition, club):
 
 
 @app.route("/purchasePlaces", methods=["POST"])
-def purchasePlaces():
+def purchase_places():
     competition = [c for c in competitions if c["name"] == request.form["competition"]][
         0
     ]
