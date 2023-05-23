@@ -2,7 +2,6 @@ import json
 from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime
 
-
 def load_clubs():
     with open("clubs.json") as c:
         listOfClubs = json.load(c)["clubs"]
@@ -28,8 +27,13 @@ def index():
 
 
 @app.route("/showSummary", methods=["POST"])
-def showSummary():
-    club = [club for club in clubs if club["email"] == request.form["email"]][0]
+def show_summary():
+    try:
+        club = [club for club in clubs if club["email"] == request.form["email"]][0]
+    except IndexError:
+        message = "Sorry, that email wasn't found"
+        flash(message)
+        return redirect(url_for("index"))
     return render_template("welcome.html", club=club, competitions=competitions)
 
 
@@ -70,15 +74,32 @@ def book(competition, club):
 
 
 @app.route("/purchasePlaces", methods=["POST"])
-def purchasePlaces():
+def purchase_places():
     competition = [c for c in competitions if c["name"] == request.form["competition"]][
         0
     ]
     club = [c for c in clubs if c["name"] == request.form["club"]][0]
-    placesRequired = int(request.form["places"])
-    competition["numberOfPlaces"] = int(competition["numberOfPlaces"]) - placesRequired
-    flash("Great-booking complete!")
-    return render_template("welcome.html", club=club, competitions=competitions)
+    places_required = int(request.form["places"])
+    clubPoints = int(club["points"])
+
+    if places_required > 12:
+        message = "You can't book more than 12 places"
+        flash(message)
+        return redirect(
+            url_for("book", club=club["name"], competition=competition["name"])
+        )
+    elif clubPoints < places_required:
+        message = "You don't have enough points."
+        flash(message)
+        return redirect(
+            url_for("book", club=club["name"], competition=competition["name"])
+        )
+    else:
+        competition["numberOfPlaces"] = (
+            int(competition["numberOfPlaces"]) - places_required
+        )
+        flash("Great-booking complete!")
+        return render_template("welcome.html", club=club, competitions=competitions)
 
 
 # TODO: Add route for points display
