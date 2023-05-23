@@ -3,15 +3,15 @@ from flask import Flask, render_template, request, redirect, flash, url_for
 
 
 def load_clubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
+    with open("clubs.json") as c:
+        listOfClubs = json.load(c)["clubs"]
+        return listOfClubs
 
 
 def load_competitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+    with open("competitions.json") as comps:
+        listOfCompetitions = json.load(comps)["competitions"]
+        return listOfCompetitions
 
 
 app = Flask(__name__)
@@ -29,17 +29,18 @@ def index():
 @app.route("/showSummary", methods=["POST"])
 def showSummary():
     try:
-        club = [club for club in clubs if club['email'] == request.form['email']][0]
+        club = [club for club in clubs if club["email"] == request.form["email"]][0]
     except IndexError:
         message = "Sorry, that email wasn't found"
         flash(message)
-        return redirect(url_for('index'))
-    return render_template('welcome.html',club=club,competitions=competitions)
+        return redirect(url_for("index"))
+    return render_template("welcome.html", club=club, competitions=competitions)
 
-@app.route('/book/<competition>/<club>')
-def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+
+@app.route("/book/<competition>/<club>")
+def book(competition, club):
+    foundClub = [c for c in clubs if c["name"] == club][0]
+    foundCompetition = [c for c in competitions if c["name"] == competition][0]
     if foundClub and foundCompetition:
         return render_template(
             "booking.html", club=foundClub, competition=foundCompetition
@@ -64,7 +65,7 @@ def purchasePlaces():
         return redirect(
             url_for("book", club=club["name"], competition=competition["name"])
         )
-    elif clubPoints < placesRequired:
+    elif clubPoints < places_required:
         message = "You don't have enough points."
         flash(message)
         return redirect(
