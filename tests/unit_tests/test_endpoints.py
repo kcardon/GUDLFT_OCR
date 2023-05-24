@@ -22,7 +22,7 @@ class TestEndpoints:
 
     def test_status_code_summary_post(self, client):
         email = self.clubs[0]["email"]
-        response = client.post("/showSummary", data={"email": email})
+        response = client.post("/show_summary", data={"email": email})
         assert response.status_code == 200
 
     def test_status_code_summary_get_email_ok(self, client):
@@ -38,12 +38,12 @@ class TestEndpoints:
 
     def test_email_ko(self, client):
         email = "notavalidemail"
-        response = client.post("/showSummary", data={"email": email})
+        response = client.post("/show_summary", data={"email": email})
         assert response.status_code == 302
 
     def test_email_notfound(self, client):
         email = "test@test.fr"
-        response = client.post("/showSummary", data={"email": email})
+        response = client.post("/show_summary", data={"email": email})
         assert response.status_code == 302
         assert get_flashed_messages() == ["Sorry, that email wasn't found"]
 
@@ -66,7 +66,8 @@ class TestEndpoints:
 
     def test_logout(self, client):
         email = self.clubs[0]["email"]
-        response = client.post("/showSummary", data={"email": email})
+        print(email)
+        response = client.post("/show_summary", data={"email": email})
         assert response.status_code == 200
         response = client.get("/logout")
         assert response.status_code == 302
