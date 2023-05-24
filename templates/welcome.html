@@ -32,8 +32,20 @@
         {% endfor %}
     </ul>
     {%endwith%}
-  
-        
+    <h3>Clubs:</h3>
+    <table>
+        <tr>
+            <th class="header">Name</th>
+            <th class="header">Points available</th>
+        </tr>
+        {% for c in clubs %}
+        <tr>
+            <td>{{c["name"]}}</td>
+            <td>{{c["points"]}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+         
 
 </body>
 </html>

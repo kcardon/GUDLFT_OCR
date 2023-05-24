@@ -34,7 +34,7 @@ def show_summary():
         message = "Sorry, that email wasn't found"
         flash(message)
         return redirect(url_for("index"))
-    return render_template("welcome.html", club=club, competitions=competitions)
+    return render_template("welcome.html", clubs=clubs, club=club, competitions=competitions)
 
 
 @app.route("/show_summary_get/<email>", methods=["GET"])
@@ -49,12 +49,12 @@ def show_summary_get(email):
         flash(message)
         return redirect(url_for("index"))
     return render_template(
-        "welcome.html", club=club, clubs=clubs, competitions=competitions
+        "welcome.html", clubs=clubs, club=club, clubs=clubs, competitions=competitions
     )
 
 
 @app.route("/book/<competition>/<club>")
-def book(competition, club):
+def book(competition, club):   
     found_club = [c for c in clubs if c["name"] == club][0]
     found_competition = [c for c in competitions if c["name"] == competition][0]
     if found_club and found_competition:
@@ -70,7 +70,7 @@ def book(competition, club):
         )
     else:
         flash("Something went wrong-please try again")
-        return render_template("welcome.html", club=club, competitions=competitions)
+        return render_template("welcome.html", clubs=clubs, club=club, competitions=competitions)
 
 
 @app.route("/purchasePlaces", methods=["POST"])
@@ -79,6 +79,7 @@ def purchase_places():
         0
     ]
     club = [c for c in clubs if c["name"] == request.form["club"]][0]
+   
     places_required = int(request.form["places"])
     clubPoints = int(club["points"])
 
@@ -100,11 +101,15 @@ def purchase_places():
         )
         club["points"] = int(club["points"]) - places_required
         flash("Great-booking complete!")
-        return render_template("welcome.html", club=club, competitions=competitions)
+        return render_template("welcome.html", clubs=clubs, club=club, competitions=competitions)
 
 
-# TODO: Add route for points display
 
+@app.route("/clubs_board")
+def clubs_board():
+    """display a board with each club and their number of available points"""
+    clubs = sorted(load_clubs(), key=lambda club: club["name"])
+    return render_template("clubs_board.html", clubs=clubs)
 
 @app.route("/logout")
 def logout():
