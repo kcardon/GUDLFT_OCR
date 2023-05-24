@@ -21,7 +21,6 @@ app.secret_key = "something_special"
 competitions = load_competitions()
 clubs = load_clubs()
 
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -75,7 +74,6 @@ def book(competition, club):
 
 
 @app.route("/purchasePlaces", methods=["POST"])
-
 def purchase_places():
     competition = [c for c in competitions if c["name"] == request.form["competition"]][
         0
